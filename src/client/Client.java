@@ -2,6 +2,7 @@ package client;
 
 import akka.actor.*;
 import resources.ErrorResponse;
+import resources.OrderResponse;
 import resources.SearchResponse;
 
 
@@ -20,8 +21,14 @@ public class Client extends AbstractActor{
                     }
                 })
                 .match(SearchResponse.class, response -> {   //odpowiedzi od serwera na zapytania klienta
-                    System.out.println("Title: " + response.getTitle());
-                    System.out.println("Price: " + response.getPrice());
+                    System.out.println("Title: " + response.getTitle() + " Price: " + response.getPrice());
+                })
+                .match(OrderResponse.class, response -> {   //odpowiedzi od serwera na zapytania klienta
+                    if(response.isSucceed()){
+                        System.out.println("Order succeed: " + response.getTitle());
+                    }else{
+                        System.out.println("Order didn't succeed: " + response.getTitle());
+                    }
                 })
                 .match(ErrorResponse.class, response -> {
                     System.out.println(response.getMsg());
