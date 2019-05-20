@@ -1,11 +1,8 @@
 package server;
 
+import resources.*;
 import scala.concurrent.duration.Duration;
 import java.io.*;
-
-import resources.SearchDBRequest;
-import resources.SearchRequest;
-import resources.SearchResponse;
 
 import akka.actor.*;
 import akka.japi.pf.DeciderBuilder;
@@ -24,8 +21,8 @@ public class DBWorker extends AbstractActor {
         return receiveBuilder()
                 .match(SearchRequest.class, request -> {
                     client = getSender();
-                    getContext().actorOf(Props.create(DBSearch.class), "searchDatabase1").tell(new SearchDBRequest(request.getTitle(), "database/db1.txt"), getSelf());
-                    getContext().actorOf(Props.create(DBSearch.class), "searchDatabase2").tell(new SearchDBRequest(request.getTitle(), "database/db2.txt"), getSelf());
+                    getContext().actorOf(Props.create(DBSearch.class), "searchDatabase1").tell(new SearchDBRequest(request.getTitle(), "database/db2342.txt"), getSelf());
+                    getContext().actorOf(Props.create(DBSearch.class), "searchDatabase2").tell(new SearchDBRequest(request.getTitle(), "database/db123123.txt"), getSelf());
                 })
                 .match(SearchResponse.class, response -> {
                     if((response.getPrice() == 0) && counter == 2){
@@ -36,12 +33,25 @@ public class DBWorker extends AbstractActor {
                         getContext().stop(getSelf());
                     }
                 })
+                .match(DBErrorResponse.class, response -> {
+                    if(dbcounter == 2){
+                        counter--;
+                        dbcounter--;
+                    }else if(dbcounter == 1){
+                        client.tell("Databases are not available", getSelf());
+                        getContext().stop(getSelf());
+                    }
+                    if(counter == 0){
+                        client.tell(new SearchResponse("aa", 0), getSelf());
+                        getContext().stop(getSelf());
+                    }
+                })
                 .build();
     }
 
-    private SupervisorStrategy strategy //TODO
+    private SupervisorStrategy strategy 
             = new OneForOneStrategy(10, Duration.create("1 minute"), DeciderBuilder
-            .match(FileNotFoundException.class, o -> restart())
+            .match(FileNotFoundException.class, o -> escalate())
             .matchAny(o -> restart())
             .build());
 

@@ -16,6 +16,8 @@ public class Client extends AbstractActor{
                 .match(String.class, s -> { //z konsoli
                     if (s.startsWith("search") || s.startsWith("order") || s.startsWith("stream")) {
                         server.tell(s, getSelf());
+                    }else {
+                        System.out.println(s);
                     }
                 })
                 .match(SearchResponse.class, response -> {

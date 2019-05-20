@@ -2,11 +2,9 @@ package server;
 
 import akka.actor.AbstractActor;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 
+import resources.DBErrorResponse;
 import resources.SearchDBRequest;
 import resources.SearchResponse;
 
@@ -16,8 +14,14 @@ public class DBSearch extends AbstractActor {
     public Receive createReceive() {
         return receiveBuilder()
                 .match(SearchDBRequest.class, request -> {
-                    SearchResponse response = new SearchResponse(request.getTitle(), searchPrice(request.getTitle(), request.getDatabase()));
-                    getSender().tell(response, getSelf());
+                    try{
+                        SearchResponse response = new SearchResponse(request.getTitle(), searchPrice(request.getTitle(), request.getDatabase()));
+                        getSender().tell(response, getSelf());
+                    }catch (FileNotFoundException e){
+                        DBErrorResponse response = new DBErrorResponse("database not available");
+                        getSender().tell(response, getSelf());
+                    }
+
                 })
                 .build();
     }
@@ -40,6 +44,4 @@ public class DBSearch extends AbstractActor {
         reader.close();
         return price;
     }
-
-
 }
