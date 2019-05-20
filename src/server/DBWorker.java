@@ -1,61 +1,54 @@
 package server;
 
-import akka.actor.AbstractActor;
-import resources.ErrorResponse;
+import scala.concurrent.duration.Duration;
+import java.io.*;
+
+import resources.SearchDBRequest;
 import resources.SearchRequest;
 import resources.SearchResponse;
 
-import java.io.*;
+import akka.actor.*;
+import akka.japi.pf.DeciderBuilder;
+
+import static akka.actor.SupervisorStrategy.restart;
+import static akka.actor.SupervisorStrategy.escalate;
 
 public class DBWorker extends AbstractActor {
 
-    @Override //TODO - code cleaning
+    private ActorRef client = null;
+    private int counter = 2;
+
+    @Override
     public AbstractActor.Receive createReceive() {
         return receiveBuilder()
                 .match(SearchRequest.class, request -> {
+                    client = getSender();
 
-                    boolean flag = true;
-                    int price = 0;
-                    try{
-                        price = searchTitle(request.getTitle());
+                    getContext().actorOf(Props.create(DBSearch.class), "searchDatabase1").tell(new SearchDBRequest(request.getTitle(), "database/db1.txt"), getSelf());
+                    getContext().actorOf(Props.create(DBSearch.class), "searchDatabase2").tell(new SearchDBRequest(request.getTitle(), "database/db2.txt"), getSelf());
+                })
+                .match(SearchResponse.class, response -> {
+                    if((response.getPrice() == 0) && counter == 2){
+                        counter--;
                     }
-                    catch (FileNotFoundException e){
-                        ErrorResponse res = new ErrorResponse("Databases not available");
-                        getSender().tell(res, getSelf());
+                    else{
+                        client.tell(response, getSelf());
                         getContext().stop(getSelf());
-                        flag = false;
-                    }
-                    if(flag){
-                        if(price == 0){
-                            ErrorResponse res = new ErrorResponse("Book is not in the database");
-                            getSender().tell(res, getSelf());
-                            getContext().stop(getSelf());
-                        }else{
-                            SearchResponse response = new SearchResponse(request.getTitle(), price); //TODO - przeszukiwanie
-                            getSender().tell(response, getSelf());
-                            getContext().stop(getSelf());
-                        }
                     }
                 })
                 .build();
     }
 
-    private Integer searchTitle(String title) throws IOException { //TODO przenieść do innego aktora????
 
-        BufferedReader reader = new BufferedReader(new FileReader("database/db1.txt"));
+    private static SupervisorStrategy strategy //TODO
+            = new OneForOneStrategy(10, Duration.create("1 minute"), DeciderBuilder
+            .match(FileNotFoundException.class, o -> restart())
+            .matchAny(o -> escalate())
+            .build());
 
-        int price = 0;
-        while(true){
-            String line = reader.readLine();
-            if(line == null) break;
-            if(line.contains(title)){
-                String[] elems = line.split(" ");
-                price = Integer.parseInt(elems[elems.length - 1]);
-                break;
-            }
-        }
-
-        reader.close();
-        return price;
+    @Override
+    public SupervisorStrategy supervisorStrategy() {
+        return strategy;
     }
+
 }

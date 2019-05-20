@@ -5,8 +5,11 @@ import akka.actor.OneForOneStrategy;
 import akka.actor.Props;
 import akka.actor.SupervisorStrategy;
 import akka.japi.pf.DeciderBuilder;
+
 import resources.SearchRequest;
+
 import scala.concurrent.duration.Duration;
+
 import static akka.actor.SupervisorStrategy.restart;
 
 public class DBManager extends AbstractActor{
@@ -15,15 +18,12 @@ public class DBManager extends AbstractActor{
     public Receive createReceive() {
         return receiveBuilder()
                 .match(SearchRequest.class, request -> {
-                    getContext().getSystem().actorOf(Props.create(DBWorker.class), "databaseWorker").tell(request, getSender());
+                    getContext().actorOf(Props.create(DBWorker.class), "databaseWorker").tell(request, getSender());
                 })
                 .build();
     }
 
-
-
-    //TODO
-    private static SupervisorStrategy strategy
+    private static SupervisorStrategy strategy //TODO
             = new OneForOneStrategy(10, Duration.create("1 minute"), DeciderBuilder
                     .matchAny(o -> restart())
                     .build());

@@ -1,7 +1,7 @@
 package client;
 
 import akka.actor.*;
-import resources.ErrorResponse;
+
 import resources.OrderResponse;
 import resources.SearchResponse;
 
@@ -14,24 +14,23 @@ public class Client extends AbstractActor{
     public Receive createReceive() {
         return receiveBuilder()
                 .match(String.class, s -> { //z konsoli
-                    if (s.startsWith("search")) {
-                        server.tell(s, getSelf());
-                    }else if (s.startsWith("order")) {
+                    if (s.startsWith("search") || s.startsWith("order") || s.startsWith("stream")) {
                         server.tell(s, getSelf());
                     }
                 })
-                .match(SearchResponse.class, response -> {   //odpowiedzi od serwera na zapytania klienta
-                    System.out.println("Title: " + response.getTitle() + " Price: " + response.getPrice());
+                .match(SearchResponse.class, response -> {
+                    if(response.getPrice() == 0){
+                        System.out.println("Book is not in the database");
+                    }else{
+                        System.out.println("Title: " + response.getTitle() + ", Price: " + response.getPrice());
+                    }
                 })
-                .match(OrderResponse.class, response -> {   //odpowiedzi od serwera na zapytania klienta
+                .match(OrderResponse.class, response -> {
                     if(response.isSucceed()){
                         System.out.println("Order succeed: " + response.getTitle());
                     }else{
                         System.out.println("Order didn't succeed: " + response.getTitle());
                     }
-                })
-                .match(ErrorResponse.class, response -> {
-                    System.out.println(response.getMsg());
                 })
                 .build();
     }
