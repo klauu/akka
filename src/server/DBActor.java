@@ -10,7 +10,7 @@ import akka.japi.pf.DeciderBuilder;
 import static akka.actor.SupervisorStrategy.restart;
 import static akka.actor.SupervisorStrategy.escalate;
 
-public class DBWorker extends AbstractActor {
+public class DBActor extends AbstractActor {
 
     private ActorRef client = null;
     private int counter = 2;
@@ -21,8 +21,8 @@ public class DBWorker extends AbstractActor {
         return receiveBuilder()
                 .match(SearchRequest.class, request -> {
                     client = getSender();
-                    getContext().actorOf(Props.create(DBSearch.class), "searchDatabase1").tell(new SearchDBRequest(request.getTitle(), "database/db2342.txt"), getSelf());
-                    getContext().actorOf(Props.create(DBSearch.class), "searchDatabase2").tell(new SearchDBRequest(request.getTitle(), "database/db123123.txt"), getSelf());
+                    getContext().actorOf(Props.create(DBSearch.class), "searchDatabase1").tell(new SearchDBRequest(request.getTitle(), "database/db1.txt"), getSelf());
+                    getContext().actorOf(Props.create(DBSearch.class), "searchDatabase2").tell(new SearchDBRequest(request.getTitle(), "database/db2.txt"), getSelf());
                 })
                 .match(SearchResponse.class, response -> {
                     if((response.getPrice() == 0) && counter == 2){
@@ -49,7 +49,7 @@ public class DBWorker extends AbstractActor {
                 .build();
     }
 
-    private SupervisorStrategy strategy 
+    private SupervisorStrategy strategy
             = new OneForOneStrategy(10, Duration.create("1 minute"), DeciderBuilder
             .match(FileNotFoundException.class, o -> escalate())
             .matchAny(o -> restart())

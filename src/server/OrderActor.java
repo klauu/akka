@@ -7,7 +7,7 @@ import akka.actor.AbstractActor;
 import resources.OrderRequest;
 import resources.OrderResponse;
 
-public class OrderWorker extends AbstractActor{
+public class OrderActor extends AbstractActor{
     @Override
     public Receive createReceive() {
         return receiveBuilder()

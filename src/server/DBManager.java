@@ -18,7 +18,7 @@ public class DBManager extends AbstractActor{
     public Receive createReceive() {
         return receiveBuilder()
                 .match(SearchRequest.class, request -> {
-                    getContext().actorOf(Props.create(DBWorker.class), "databaseWorker").tell(request, getSender());
+                    getContext().actorOf(Props.create(DBActor.class), "databaseWorker").tell(request, getSender());
                 })
                 .build();
     }

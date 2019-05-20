@@ -17,7 +17,7 @@ public class OrderManager extends AbstractActor {
     public Receive createReceive() {
         return receiveBuilder()
                 .match(OrderRequest.class, request -> {
-                    getContext().actorOf(Props.create(OrderWorker.class), "orderWorker").tell(request, getSender());
+                    getContext().actorOf(Props.create(OrderActor.class), "orderWorker" ).tell(request, getSender());
                 })
                 .build();
     }
