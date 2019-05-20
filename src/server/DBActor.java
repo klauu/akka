@@ -51,7 +51,7 @@ public class DBActor extends AbstractActor {
 
     private SupervisorStrategy strategy
             = new OneForOneStrategy(10, Duration.create("1 minute"), DeciderBuilder
-            .match(FileNotFoundException.class, o -> escalate())
+            .match(FileNotFoundException.class, o -> SupervisorStrategy.stop())
             .matchAny(o -> restart())
             .build());
 

@@ -23,7 +23,7 @@ public class DBManager extends AbstractActor{
                 .build();
     }
 
-    private static SupervisorStrategy strategy //TODO
+    private static SupervisorStrategy strategy
             = new OneForOneStrategy(10, Duration.create("1 minute"), DeciderBuilder
                     .matchAny(o -> restart())
                     .build());

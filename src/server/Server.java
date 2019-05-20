@@ -8,14 +8,12 @@ import resources.SearchRequest;
 
 import scala.concurrent.duration.Duration;
 
-import static akka.actor.SupervisorStrategy.stop;
-
 public class Server extends AbstractActor {
 
     final ActorRef databaseManager = getContext().actorOf(Props.create(DBManager.class), "databaseManager");
     final ActorRef orderManager = getContext().actorOf(Props.create(OrderManager.class), "orderManager");
   //  final ActorRef streamManager = getContext().getSystem().actorOf(Props.create(StreamManager.class), "streamManager");
-//TODO
+
 
     @Override
     public Receive createReceive() {
@@ -35,9 +33,9 @@ public class Server extends AbstractActor {
     }
 
 
-    private static SupervisorStrategy strategy //TODO
+    private static SupervisorStrategy strategy
             = new OneForOneStrategy(10, Duration.create("1 minute"), DeciderBuilder
-                    .matchAny(o -> stop())
+                    .matchAny(o -> SupervisorStrategy.restart())
                     .build());
 
     @Override
