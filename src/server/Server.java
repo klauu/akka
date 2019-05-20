@@ -8,7 +8,7 @@ import resources.SearchRequest;
 
 import scala.concurrent.duration.Duration;
 
-import static akka.actor.SupervisorStrategy.restart;
+import static akka.actor.SupervisorStrategy.stop;
 
 public class Server extends AbstractActor {
 
@@ -22,7 +22,6 @@ public class Server extends AbstractActor {
         return receiveBuilder()
                 .match(String.class, s -> {
                     if (s.startsWith("search")) {
-                        System.out.println("Server");
                         SearchRequest request = new SearchRequest(s.substring(7));
                         databaseManager.tell(request, getSender());
                     }else if (s.startsWith("order")) {
@@ -31,19 +30,18 @@ public class Server extends AbstractActor {
                     }else if (s.startsWith("stream")) {
                        //TODO
                     }
-
                 })
                 .build();
     }
 
 
-//    private static SupervisorStrategy strategy //TODO
-//            = new OneForOneStrategy(10, Duration.create("1 minute"), DeciderBuilder
-//                    .matchAny(o -> restart())
-//                    .build());
-//
-//    @Override
-//    public SupervisorStrategy supervisorStrategy() {
-//        return strategy;
-//    }
+    private static SupervisorStrategy strategy //TODO
+            = new OneForOneStrategy(10, Duration.create("1 minute"), DeciderBuilder
+                    .matchAny(o -> stop())
+                    .build());
+
+    @Override
+    public SupervisorStrategy supervisorStrategy() {
+        return strategy;
+    }
 }

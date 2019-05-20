@@ -3,6 +3,7 @@ package server;
 import akka.actor.AbstractActor;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 
@@ -39,4 +40,6 @@ public class DBSearch extends AbstractActor {
         reader.close();
         return price;
     }
+
+
 }

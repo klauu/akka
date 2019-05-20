@@ -17,13 +17,13 @@ public class DBWorker extends AbstractActor {
 
     private ActorRef client = null;
     private int counter = 2;
+    private int dbcounter = 2;
 
     @Override
     public AbstractActor.Receive createReceive() {
         return receiveBuilder()
                 .match(SearchRequest.class, request -> {
                     client = getSender();
-
                     getContext().actorOf(Props.create(DBSearch.class), "searchDatabase1").tell(new SearchDBRequest(request.getTitle(), "database/db1.txt"), getSelf());
                     getContext().actorOf(Props.create(DBSearch.class), "searchDatabase2").tell(new SearchDBRequest(request.getTitle(), "database/db2.txt"), getSelf());
                 })
@@ -39,11 +39,10 @@ public class DBWorker extends AbstractActor {
                 .build();
     }
 
-
-    private static SupervisorStrategy strategy //TODO
+    private SupervisorStrategy strategy //TODO
             = new OneForOneStrategy(10, Duration.create("1 minute"), DeciderBuilder
             .match(FileNotFoundException.class, o -> restart())
-            .matchAny(o -> escalate())
+            .matchAny(o -> restart())
             .build());
 
     @Override

@@ -1,5 +1,10 @@
-"Pride and Prejudice" 15
-"Hitchhiker's guide to the Galaxy" 20
-"The colour of magic" 12
-"Shogun" 50
-
+"Lalka" 15
+"Harry Potter" 39
+"Mein Kampf" 20
+"Metro" 40
+"Into thin air" 35
+"Into the wild" 30
+"Call me by your name" 38
+"Cien wiatru" 20
+"Miasto kosci" 37
+"Miasto szkla" 36
